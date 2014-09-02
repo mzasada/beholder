@@ -9,4 +9,6 @@ public interface ClusterTopology {
   List<ClusterNode> getSecondaryNodes();
 
   ClusterNode getLeaderNode();
+
+  ClusterNode self();
 }

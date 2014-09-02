@@ -3,8 +3,9 @@ package org.beholder.raft.consensus;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalNotification;
+import com.google.common.eventbus.Subscribe;
 import org.beholder.events.EventBroker;
-import org.beholder.events.RemoteEvent;
+import org.beholder.events.remote.HeartbeatEvent;
 import org.beholder.time.TimeService;
 import org.beholder.topology.ClusterNode;
 import org.slf4j.Logger;
@@ -30,25 +31,28 @@ public class LeaderNodeHeartbeatController {
     this.eventBroker = eventBroker;
     this.timeService = timeService;
 
+    eventBroker.register(this);
     beginHeartbeatWithAllFollowers();
   }
 
   private void beginHeartbeatWithAllFollowers() {
-    eventBroker.send(new RemoteEvent() {
-      @Override
-      public ClusterNode getSender() {
-        return null;
-      }
+    eventBroker
+        .send(HeartbeatEvent.class)
+        .toAllFollowers()
+        .subscribe(follower -> heartbeatCache.put(follower, timeService.now()));
+  }
 
-      @Override
-      public ClusterNode getReceiver() {
-        return null;
-      }
-    }).toAllFollowers().subscribe(follower -> heartbeatCache.put(follower, timeService.now()));
+  @Subscribe
+  public void handleHeartbeatEvent(HeartbeatEvent event) {
+    LOGGER.info("Leader node received a heartbeat from {}", event.getSender());
+    eventBroker
+        .send(HeartbeatEvent.class)
+        .toSenderOf(event)
+        .subscribe(follower -> heartbeatCache.put(follower, timeService.now()));
   }
 
   private void handleHeartbeatTimeout(RemovalNotification<ClusterNode, LocalDateTime> notification) {
-    LOGGER.info("Leader node didn't receive a heartbeat from {}", notification.getKey());
+    LOGGER.info("Leader node didn't receive a heartbeat from {} since {}", notification.getKey(), notification.getValue());
   }
 
 }

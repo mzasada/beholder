@@ -3,9 +3,9 @@ package org.beholder.raft.consensus;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalNotification;
+import com.google.common.eventbus.Subscribe;
 import org.beholder.events.EventBroker;
-import org.beholder.events.RemoteEvent;
-import org.beholder.raft.messages.HeartbeatRequest;
+import org.beholder.events.remote.HeartbeatEvent;
 import org.beholder.time.TimeService;
 import org.beholder.topology.ClusterNode;
 import org.slf4j.Logger;
@@ -30,20 +30,17 @@ public class FollowerHeartbeatController {
         .removalListener(this::handleHeartbeatTimeout)
         .expireAfterWrite(electionTimeoutInMillis, TimeUnit.MILLISECONDS)
         .build();
+
+    eventBroker.register(this);
   }
 
-  private void handleHeartbeatRequest(HeartbeatRequest heartbeatRequest) {
-    eventBroker.send(new RemoteEvent() {
-      @Override
-      public ClusterNode getSender() {
-        return null;
-      }
-
-      @Override
-      public ClusterNode getReceiver() {
-        return null;
-      }
-    }).toSenderOf(null).subscribe(leader -> heartbeatCache.put(leader, timeService.now()));
+  @Subscribe
+  public void handleHeartbeatRequest(HeartbeatEvent event) {
+    LOGGER.info("Follower node received a heartbeat from the leader {}", event.getSender());
+    eventBroker
+        .send(HeartbeatEvent.class)
+        .toSenderOf(event)
+        .subscribe(leader -> heartbeatCache.put(leader, timeService.now()));
   }
 
   private void handleHeartbeatTimeout(RemovalNotification<ClusterNode, LocalDateTime> notification) {
