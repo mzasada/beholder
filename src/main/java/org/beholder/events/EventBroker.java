@@ -21,10 +21,13 @@ public class EventBroker {
     this.eventRegistry = eventRegistry;
     this.messageGateway = messageGateway;
     this.clusterTopology = clusterTopology;
+
+    this.messageGateway.remoteEventStream().subscribe(eventBus::post);
   }
 
+  // TODO: needed?
   public <E extends LocalEvent> void send(E event) {
-
+    eventBus.post(event);
   }
 
   public <E extends RemoteEvent> OutgoingRemoteEventStub send(Class<E> eventType) {
