@@ -1,4 +1,6 @@
 package org.beholder.io;
 
-public interface Message {
+import org.beholder.events.RemoteEvent;
+
+public interface Message extends RemoteEvent {
 }

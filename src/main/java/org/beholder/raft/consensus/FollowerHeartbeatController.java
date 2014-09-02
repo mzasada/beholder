@@ -3,9 +3,9 @@ package org.beholder.raft.consensus;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalNotification;
-import org.beholder.io.TopologyAwareMessageBroker;
+import org.beholder.events.EventBroker;
+import org.beholder.events.RemoteEvent;
 import org.beholder.raft.messages.HeartbeatRequest;
-import org.beholder.raft.messages.HeartbeatResponse;
 import org.beholder.time.TimeService;
 import org.beholder.topology.ClusterNode;
 import org.slf4j.Logger;
@@ -18,15 +18,14 @@ public class FollowerHeartbeatController {
   private static final Logger LOGGER = LoggerFactory.getLogger(FollowerHeartbeatController.class);
 
   private final Cache<ClusterNode, LocalDateTime> heartbeatCache;
-  private final TopologyAwareMessageBroker topologyAwareMessageBroker;
+  private final EventBroker eventBroker;
   private final TimeService timeService;
 
   public FollowerHeartbeatController(
-      TopologyAwareMessageBroker topologyAwareMessageBroker,
       TimeService timeService,
-      long electionTimeoutInMillis) {
-    this.topologyAwareMessageBroker = topologyAwareMessageBroker;
+      long electionTimeoutInMillis, EventBroker eventBroker) {
     this.timeService = timeService;
+    this.eventBroker = eventBroker;
     this.heartbeatCache = CacheBuilder.newBuilder()
         .removalListener(this::handleHeartbeatTimeout)
         .expireAfterWrite(electionTimeoutInMillis, TimeUnit.MILLISECONDS)
@@ -34,9 +33,17 @@ public class FollowerHeartbeatController {
   }
 
   private void handleHeartbeatRequest(HeartbeatRequest heartbeatRequest) {
+    eventBroker.send(new RemoteEvent() {
+      @Override
+      public ClusterNode getSender() {
+        return null;
+      }
 
-    topologyAwareMessageBroker.sendToLeader(new HeartbeatResponse());
-    heartbeatCache.put(null, timeService.now());
+      @Override
+      public ClusterNode getReceiver() {
+        return null;
+      }
+    }).toSenderOf(null).subscribe(leader -> heartbeatCache.put(leader, timeService.now()));
   }
 
   private void handleHeartbeatTimeout(RemovalNotification<ClusterNode, LocalDateTime> notification) {
