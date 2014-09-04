@@ -19,7 +19,7 @@ class EventSinkTest extends Specification {
 
   EventSink eventSink = new EventSink(executorService);
 
-  def "should emit events all the events"() {
+  def "should emit all the events"() {
     given:
     def events = (1..10).collect { new EmptyRemoteEvent(id: it) }
     def receivedEvents = []
