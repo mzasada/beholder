@@ -2,7 +2,7 @@ package org.beholder.io.standalone
 
 import com.google.common.util.concurrent.MoreExecutors
 import org.beholder.events.RemoteEvent
-import org.beholder.topology.ClusterNode
+import org.beholder.events.remote.EmptyRemoteEvent
 import rx.functions.Action1
 import rx.observers.TestObserver
 import spock.lang.Specification
@@ -21,7 +21,7 @@ class EventSinkTest extends Specification {
 
   def "should emit all the events"() {
     given:
-    def events = (1..10).collect { new EmptyRemoteEvent(id: it) }
+    def events = (1..10).collect { new EmptyRemoteEvent(it) }
     def receivedEvents = []
     rx.Observable.create(eventSink).subscribe(
         { RemoteEvent event -> receivedEvents << event } as Action1<? super RemoteEvent>)
@@ -44,15 +44,5 @@ class EventSinkTest extends Specification {
     then:
     observer.assertTerminalEvent()
     observer.getOnCompletedEvents().every { it.onCompleted }
-  }
-
-  private static class EmptyRemoteEvent implements RemoteEvent {
-
-    int id
-
-    @Override
-    ClusterNode getSender() {
-      return null
-    }
   }
 }
