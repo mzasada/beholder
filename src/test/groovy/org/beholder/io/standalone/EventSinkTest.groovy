@@ -15,7 +15,8 @@ import java.util.concurrent.TimeUnit
 class EventSinkTest extends Specification {
 
   ExecutorService executorService = MoreExecutors.getExitingExecutorService(
-      new ThreadPoolExecutor(5, 10, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>()))
+      new ThreadPoolExecutor(5, 10, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>()),
+      250, TimeUnit.MILLISECONDS)
 
   EventSink eventSink = new EventSink(executorService);
 
