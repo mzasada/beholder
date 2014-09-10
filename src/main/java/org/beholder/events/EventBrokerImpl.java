@@ -7,16 +7,16 @@ import org.beholder.topology.ClusterTopology;
 import rx.Observable;
 import rx.Subscriber;
 
-public class EventBroker {
+public class EventBrokerImpl implements EventBroker {
   private final EventBus eventBus;
   private final EventRegistry eventRegistry;
   private final MessageGateway messageGateway;
   private final ClusterTopology clusterTopology;
 
-  public EventBroker(EventBus eventBus,
-                     EventRegistry eventRegistry,
-                     MessageGateway messageGateway,
-                     ClusterTopology clusterTopology) {
+  public EventBrokerImpl(EventBus eventBus,
+                         EventRegistry eventRegistry,
+                         MessageGateway messageGateway,
+                         ClusterTopology clusterTopology) {
     this.eventBus = eventBus;
     this.eventRegistry = eventRegistry;
     this.messageGateway = messageGateway;
@@ -25,19 +25,20 @@ public class EventBroker {
     this.messageGateway.remoteEventStream().subscribe(eventBus::post);
   }
 
-  // TODO: needed?
-  public <E extends LocalEvent> void send(E event) {
-    eventBus.post(event);
+  @Override
+  public <E extends LocalEvent> void sendLocalEvent(Class<E> eventType) {
+    eventBus.post(eventRegistry.localEvent(eventType));
   }
 
-  public <E extends RemoteEvent> OutgoingRemoteEventStub send(Class<E> eventType) {
+  @Override
+  public <E extends RemoteEvent> OutgoingRemoteEventStub sendRemoteEvent(Class<E> eventType) {
     return new OutgoingRemoteEventStub() {
       @Override
       public Observable<ClusterNode> toAllFollowers() {
         return Observable.create((Subscriber<? super ClusterNode> subscriber) -> {
           if (!subscriber.isUnsubscribed()) {
             clusterTopology.getSecondaryNodes().forEach(node -> {
-              messageGateway.sendTo(node, eventRegistry.create(eventType));
+              messageGateway.sendTo(node, eventRegistry.remoteEvent(eventType));
               subscriber.onNext(node);
             });
             subscriber.onCompleted();
@@ -47,16 +48,18 @@ public class EventBroker {
 
       @Override
       public <R extends RemoteEvent> Observable<ClusterNode> toSenderOf(R event) {
-        messageGateway.sendTo(event.getSender(), eventRegistry.create(eventType));
+        messageGateway.sendTo(event.getSender(), eventRegistry.remoteEvent(eventType));
         return Observable.just(event.getSender());
       }
     };
   }
 
+  @Override
   public void register(Object object) {
     eventBus.register(object);
   }
 
+  @Override
   public void unregister(Object object) {
     eventBus.unregister(object);
   }

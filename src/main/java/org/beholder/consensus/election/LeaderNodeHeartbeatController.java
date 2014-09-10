@@ -37,7 +37,7 @@ public class LeaderNodeHeartbeatController {
 
   private void beginHeartbeatWithAllFollowers() {
     eventBroker
-        .send(HeartbeatEvent.class)
+        .sendRemoteEvent(HeartbeatEvent.class)
         .toAllFollowers()
         .subscribe(follower -> heartbeatCache.put(follower, timeService.now()));
   }
@@ -46,7 +46,7 @@ public class LeaderNodeHeartbeatController {
   public void handleHeartbeatEvent(HeartbeatEvent event) {
     LOGGER.info("Leader node received a heartbeat from {}", event.getSender());
     eventBroker
-        .send(HeartbeatEvent.class)
+        .sendRemoteEvent(HeartbeatEvent.class)
         .toSenderOf(event)
         .subscribe(follower -> heartbeatCache.put(follower, timeService.now()));
   }
