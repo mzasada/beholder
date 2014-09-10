@@ -1,6 +1,5 @@
 package org.beholder.io.standalone
 
-import com.google.common.util.concurrent.MoreExecutors
 import org.beholder.events.RemoteEvent
 import org.beholder.events.remote.EmptyRemoteEvent
 import org.beholder.topology.ClusterNode
@@ -8,15 +7,11 @@ import rx.functions.Action1
 import spock.lang.Specification
 
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.Executors
 
 class LocalMessageGatewayTest extends Specification {
 
-  ExecutorService executorService = MoreExecutors.getExitingExecutorService(
-      new ThreadPoolExecutor(5, 10, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>()),
-      250, TimeUnit.MILLISECONDS)
+  ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   def "should deliver all messages to the second node"() {
     given:
