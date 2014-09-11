@@ -34,15 +34,18 @@ public class AlarmClock {
     });
   }
 
-  public void start() {
+  public AlarmClock start() {
     tickingThread.start();
+    return this;
   }
 
-  public void snooze() {
+  public AlarmClock snooze() {
     blockingQueue.add(SNOOZE_COMMAND);
+    return this;
   }
 
-  public void stop() {
+  public AlarmClock stop() {
     blockingQueue.add(STOP_COMMAND);
+    return this;
   }
 }

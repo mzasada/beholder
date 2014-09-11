@@ -5,6 +5,7 @@ import org.beholder.events.remote.EmptyRemoteEvent
 import org.beholder.topology.ClusterNode
 import rx.functions.Action1
 import spock.lang.Specification
+import spock.util.concurrent.PollingConditions
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -15,6 +16,8 @@ class LocalMessageGatewayTest extends Specification {
 
   def "should deliver all messages to the second node"() {
     given:
+    def condition = new PollingConditions(timeout: 1, initialDelay: 0.2, factor: 0.2)
+
     def nodeOne = new TestClusterNode()
     def nodeTwo = new TestClusterNode()
 
@@ -30,11 +33,15 @@ class LocalMessageGatewayTest extends Specification {
     events.each { nodeTwoGateway.sendTo(nodeOne, it) }
 
     then:
-    receivedEvents.equals(events)
+    condition.eventually {
+      assert receivedEvents.equals(events)
+    }
   }
 
   def "should deliver 1 message to 2nd node, 0 messages to 3rd node"() {
     given:
+    def condition = new PollingConditions(timeout: 1, initialDelay: 0.2, factor: 0.2)
+
     def nodeOne = new TestClusterNode()
     def nodeTwo = new TestClusterNode()
     def nodeThree = new TestClusterNode()
@@ -58,8 +65,10 @@ class LocalMessageGatewayTest extends Specification {
     nodeOneGateway.sendTo(nodeTwo, event)
 
     then:
-    receivedEvents[nodeTwo].equals([event])
-    receivedEvents[nodeThree] == []
+    condition.eventually {
+      assert receivedEvents[nodeTwo].equals([event])
+      assert receivedEvents[nodeThree] == []
+    }
   }
 
   private static class TestClusterNode implements ClusterNode {

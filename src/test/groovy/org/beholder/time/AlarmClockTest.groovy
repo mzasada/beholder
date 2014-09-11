@@ -1,75 +1,82 @@
 package org.beholder.time
 
 import spock.lang.Specification
-import spock.util.concurrent.PollingConditions
+
+import static org.mockito.Mockito.mock
+import static org.mockito.Mockito.timeout
+import static org.mockito.Mockito.verify
 
 class AlarmClockTest extends Specification {
 
-  def callback = Mock(Runnable)
   AlarmClock alarmClock
 
-  def setup() {
-    alarmClock = new AlarmClock(callback, 200)
-  }
-
   def cleanup() {
-    alarmClock.stop()
+    alarmClock?.stop()
   }
 
   def "should call the callback after timeout"() {
     given:
-    def conditions = new PollingConditions(timeout: 0.25, initialDelay: 1.5, factor: 1.25)
+    def callback = mock(Runnable)
+    alarmClock = new AlarmClock(callback, 50)
 
     when:
     alarmClock.start()
 
     then:
-    conditions.eventually {
-      assert { 1 * callback.run() }
-    }
-  }
-
-  def "should not call the callback if snoozed once before timeout"() {
-    given:
-    def conditions = new PollingConditions(timeout: 0.25, initialDelay: 1.5, factor: 1.25)
-
-    when:
-    alarmClock.start()
-    sleep(100)
-    alarmClock.snooze()
-
-    then:
-    conditions.eventually {
-      assert { 0 * callback.run() }
-    }
+    verify(callback, timeout(80)).run()
   }
 
   def "should call the callback 2 times after 2 timeouts"() {
     given:
-    def conditions = new PollingConditions(timeout: 0.45, initialDelay: 1.5, factor: 1.25)
+    def callback = mock(Runnable)
+    alarmClock = new AlarmClock(callback, 50)
 
     when:
     alarmClock.start()
 
     then:
-    conditions.eventually {
-      assert { 2 * callback.run() }
-    }
+    verify(callback, timeout(130).times(2)).run()
   }
 
-  def "should not call the callback if snoozed and stopped before timeout"() {
+  def "should call the callback 1 time after 1 snooze "() {
     given:
-    def conditions = new PollingConditions(timeout: 0.2, initialDelay: 1.5, factor: 1.25)
+    def callback = mock(Runnable)
+    alarmClock = new AlarmClock(callback, 50)
 
     when:
     alarmClock.start()
-    sleep(100)
+    sleep(40)
     alarmClock.snooze()
 
     then:
-    conditions.eventually {
-      assert { 0 * callback.run() }
-    }
+    verify(callback, timeout(130)).run()
   }
 
+  def "should not call the callback if snoozed before timeout"() {
+    given:
+    def callback = mock(Runnable)
+    alarmClock = new AlarmClock(callback, 100)
+
+    when:
+    alarmClock.start()
+    sleep(70)
+    alarmClock.snooze()
+
+    then:
+    verify(callback, timeout(120).never()).run()
+  }
+
+  def "should not call the callback if stopped before timeout"() {
+    given:
+    def callback = mock(Runnable)
+    alarmClock = new AlarmClock(callback, 70)
+
+    when:
+    alarmClock.start()
+    sleep(50)
+    alarmClock.stop()
+
+    then:
+    verify(callback, timeout(100).never()).run()
+  }
 }
