@@ -16,7 +16,7 @@ class LocalMessageGatewayTest extends Specification {
 
   def "should deliver all messages to the second node"() {
     given:
-    def condition = new PollingConditions(timeout: 1, initialDelay: 0.2, factor: 0.2)
+    def condition = new PollingConditions(timeout: 0.5, initialDelay: 0.01, factor: 0.02)
 
     def nodeOne = new TestClusterNode()
     def nodeTwo = new TestClusterNode()
@@ -40,7 +40,7 @@ class LocalMessageGatewayTest extends Specification {
 
   def "should deliver 1 message to 2nd node, 0 messages to 3rd node"() {
     given:
-    def condition = new PollingConditions(timeout: 1, initialDelay: 0.2, factor: 0.2)
+    def condition = new PollingConditions(timeout: 0.5, initialDelay: 0.01, factor: 0.02)
 
     def nodeOne = new TestClusterNode()
     def nodeTwo = new TestClusterNode()

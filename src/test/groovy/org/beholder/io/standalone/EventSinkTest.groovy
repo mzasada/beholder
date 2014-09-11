@@ -17,7 +17,7 @@ class EventSinkTest extends Specification {
 
   def "should emit all the events"() {
     given:
-    def condition = new PollingConditions(timeout: 1, initialDelay: 0.2, factor: 0.2)
+    def condition = new PollingConditions(timeout: 0.5, initialDelay: 0.01, factor: 0.02)
     def events = (1..10).collect { new EmptyRemoteEvent(it) }
     TestObserver<RemoteEvent> observer = new TestObserver<>()
     rx.Observable.create(eventSink).subscribe(observer)
@@ -33,7 +33,7 @@ class EventSinkTest extends Specification {
 
   def "should complete the stream after closing sink"() {
     given:
-    def condition = new PollingConditions(timeout: 1, initialDelay: 0.2, factor: 0.2)
+    def condition = new PollingConditions(timeout: 0.5, initialDelay: 0.01, factor: 0.02)
     TestObserver<RemoteEvent> observer = new TestObserver<>()
     rx.Observable.create(eventSink).subscribe(observer)
 

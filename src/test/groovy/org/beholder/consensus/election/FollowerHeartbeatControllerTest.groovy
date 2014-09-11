@@ -25,18 +25,18 @@ class FollowerHeartbeatControllerTest extends Specification {
     controller.start()
 
     then:
-    verify(eventBroker, timeout(200)).sendLocalEvent(StartElectionEvent)
+    verify(eventBroker, timeout(90)).sendLocalEvent(StartElectionEvent)
   }
 
   def "should not start the election before first timeout"() {
     given:
     EventBroker eventBroker = mock(EventBroker)
-    controller = new FollowerHeartbeatController(100, eventBroker)
+    controller = new FollowerHeartbeatController(50, eventBroker)
 
     when:
     controller.start()
 
     then:
-    verify(eventBroker, timeout(80).never()).sendLocalEvent(StartElectionEvent)
+    verify(eventBroker, timeout(40).never()).sendLocalEvent(StartElectionEvent)
   }
 }
