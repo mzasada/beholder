@@ -5,11 +5,13 @@ import org.beholder.events.EventBroker;
 import org.beholder.events.local.StartElectionEvent;
 import org.beholder.events.remote.HeartbeatEvent;
 import org.beholder.time.AlarmClock;
-import org.picocontainer.Startable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FollowerHeartbeatController implements Startable {
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+public class FollowerHeartbeatController {
   private static final Logger LOGGER = LoggerFactory.getLogger(FollowerHeartbeatController.class);
 
   private final AlarmClock heartbeatTrace;
@@ -22,7 +24,7 @@ public class FollowerHeartbeatController implements Startable {
   }
 
   @Subscribe
-  public void handleHeartbeatRequest(HeartbeatEvent event) {
+  public void handleHeartbeatEvent(HeartbeatEvent event) {
     LOGGER.info("Follower node received a heartbeat from the leader {}", event.getSender());
     eventBroker
         .sendRemoteEvent(HeartbeatEvent.class)
@@ -35,13 +37,13 @@ public class FollowerHeartbeatController implements Startable {
     eventBroker.sendLocalEvent(StartElectionEvent.class);
   }
 
-  @Override
+  @PostConstruct
   public void start() {
     eventBroker.register(this);
     heartbeatTrace.start();
   }
 
-  @Override
+  @PreDestroy
   public void stop() {
     eventBroker.unregister(this);
     heartbeatTrace.stop();
