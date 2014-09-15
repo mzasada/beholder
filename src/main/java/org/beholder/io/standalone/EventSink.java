@@ -3,20 +3,16 @@ package org.beholder.io.standalone;
 import org.beholder.events.RemoteEvent;
 import org.beholder.topology.ClusterNode;
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscriber;
+import rx.schedulers.Schedulers;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
 
 public class EventSink implements Observable.OnSubscribe<RemoteEvent> {
 
-  private final ExecutorService executorService;
   private final BlockingQueue<RemoteEvent> eventQueue = new ArrayBlockingQueue<>(256);
-
-  public EventSink(ExecutorService executorService) {
-    this.executorService = executorService;
-  }
 
   public void emit(RemoteEvent event) {
     eventQueue.add(event);
@@ -28,7 +24,10 @@ public class EventSink implements Observable.OnSubscribe<RemoteEvent> {
 
   @Override
   public void call(Subscriber<? super RemoteEvent> subscriber) {
-    executorService.submit(() -> {
+    Scheduler.Worker worker = Schedulers.newThread().createWorker();
+    subscriber.add(worker);
+
+    worker.schedule(() -> {
       while (true) {
         try {
           RemoteEvent event = eventQueue.take();
@@ -42,6 +41,7 @@ public class EventSink implements Observable.OnSubscribe<RemoteEvent> {
           subscriber.onError(e);
         }
       }
+
     });
   }
 

@@ -7,12 +7,7 @@ import rx.functions.Action1
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-
 class LocalMessageGatewayTest extends Specification {
-
-  ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   def "should deliver all messages to the second node"() {
     given:
@@ -21,7 +16,7 @@ class LocalMessageGatewayTest extends Specification {
     def nodeOne = new TestClusterNode()
     def nodeTwo = new TestClusterNode()
 
-    def router = [(nodeOne): new EventSink(executorService), (nodeTwo): new EventSink(executorService)]
+    def router = [(nodeOne): new EventSink(), (nodeTwo): new EventSink()]
     LocalMessageGateway nodeOneGateway = new LocalMessageGateway(router, nodeOne)
     LocalMessageGateway nodeTwoGateway = new LocalMessageGateway(router, nodeTwo)
 
@@ -47,9 +42,9 @@ class LocalMessageGatewayTest extends Specification {
     def nodeThree = new TestClusterNode()
 
     def router = [
-        (nodeOne)  : new EventSink(executorService),
-        (nodeTwo)  : new EventSink(executorService),
-        (nodeThree): new EventSink(executorService)
+        (nodeOne)  : new EventSink(),
+        (nodeTwo)  : new EventSink(),
+        (nodeThree): new EventSink()
     ]
     LocalMessageGateway nodeOneGateway = new LocalMessageGateway(router, nodeOne)
     LocalMessageGateway nodeTwoGateway = new LocalMessageGateway(router, nodeTwo)

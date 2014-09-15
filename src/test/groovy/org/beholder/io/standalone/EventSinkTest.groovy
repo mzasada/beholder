@@ -6,14 +6,9 @@ import rx.observers.TestObserver
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-
 class EventSinkTest extends Specification {
 
-  ExecutorService executorService = Executors.newSingleThreadExecutor()
-
-  EventSink eventSink = new EventSink(executorService);
+  EventSink eventSink = new EventSink();
 
   def "should emit all the events"() {
     given:
