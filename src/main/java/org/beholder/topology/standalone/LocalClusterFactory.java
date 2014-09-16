@@ -1,8 +1,7 @@
-package org.beholder.io.standalone;
+package org.beholder.topology.standalone;
 
 import org.beholder.io.MessageGateway;
 import org.beholder.topology.ClusterNode;
-import org.beholder.topology.singleprocess.SingleProcessClusterNode;
 
 import java.util.Collections;
 import java.util.Map;

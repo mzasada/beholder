@@ -1,4 +1,4 @@
-package org.beholder.topology.singleprocess;
+package org.beholder.topology.standalone;
 
 import org.beholder.topology.ClusterNode;
 

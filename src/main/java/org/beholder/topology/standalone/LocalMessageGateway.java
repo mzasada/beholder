@@ -1,4 +1,4 @@
-package org.beholder.io.standalone;
+package org.beholder.topology.standalone;
 
 import org.beholder.events.RemoteEvent;
 import org.beholder.io.MessageGateway;

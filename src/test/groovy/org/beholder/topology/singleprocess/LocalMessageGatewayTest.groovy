@@ -1,8 +1,10 @@
-package org.beholder.io.standalone
+package org.beholder.topology.singleprocess
 
 import org.beholder.events.RemoteEvent
 import org.beholder.events.remote.EmptyRemoteEvent
 import org.beholder.topology.ClusterNode
+import org.beholder.topology.standalone.EventSink
+import org.beholder.topology.standalone.LocalMessageGateway
 import rx.functions.Action1
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions

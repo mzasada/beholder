@@ -1,5 +1,6 @@
 package org.beholder.topology.singleprocess
 
+import org.beholder.topology.standalone.SingleProcessClusterNode
 import spock.lang.Specification
 
 class SingleProcessClusterNodeTest extends Specification {

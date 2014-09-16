@@ -1,7 +1,8 @@
-package org.beholder.io.standalone
+package org.beholder.topology.singleprocess
 
 import org.beholder.events.RemoteEvent
 import org.beholder.events.remote.EmptyRemoteEvent
+import org.beholder.topology.standalone.EventSink
 import rx.observers.TestObserver
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions

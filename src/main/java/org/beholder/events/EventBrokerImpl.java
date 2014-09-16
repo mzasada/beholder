@@ -37,7 +37,7 @@ public class EventBrokerImpl implements EventBroker {
       public Observable<ClusterNode> toAllFollowers() {
         return Observable.create((Subscriber<? super ClusterNode> subscriber) -> {
           if (!subscriber.isUnsubscribed()) {
-            clusterTopology.getSecondaryNodes().forEach(node -> {
+            clusterTopology.getFollowers().forEach(node -> {
               messageGateway.sendTo(node, eventRegistry.remoteEvent(eventType));
               subscriber.onNext(node);
             });
