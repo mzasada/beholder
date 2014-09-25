@@ -1,4 +1,4 @@
-package org.beholder.io;
+package org.beholder.topology;
 
 import org.beholder.events.RemoteEvent;
 import org.beholder.topology.ClusterNode;

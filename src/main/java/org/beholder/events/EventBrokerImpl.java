@@ -1,7 +1,7 @@
 package org.beholder.events;
 
 import com.google.common.eventbus.EventBus;
-import org.beholder.io.MessageGateway;
+import org.beholder.topology.MessageGateway;
 import org.beholder.topology.ClusterNode;
 import org.beholder.topology.ClusterTopology;
 import rx.Observable;

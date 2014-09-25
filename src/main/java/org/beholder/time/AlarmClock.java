@@ -35,7 +35,9 @@ public class AlarmClock {
   }
 
   public AlarmClock start() {
-    tickingThread.start();
+    if (!tickingThread.isAlive()) {
+      tickingThread.start();
+    }
     return this;
   }
 

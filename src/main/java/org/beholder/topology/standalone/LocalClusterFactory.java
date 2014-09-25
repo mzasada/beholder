@@ -1,6 +1,6 @@
 package org.beholder.topology.standalone;
 
-import org.beholder.io.MessageGateway;
+import org.beholder.topology.MessageGateway;
 import org.beholder.topology.ClusterNode;
 
 import java.util.Collections;
